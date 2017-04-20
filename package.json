@@ -1,0 +1,19 @@
+{
+  "name": "Online Publication Management System",
+  "description": "CMPE138 Individual Project",
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.14.0",
+    "promise": "^7.1.1"
+  },
+  "engines": {
+    "node": "^6.2.0"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/HuangDave/CMPE138OPMS.git"
+  }
+}
