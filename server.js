@@ -13,7 +13,7 @@ app
     .set('view engine', 'ejs')
 
     // set routes...
-    //.use('/auth', authRoutes)
+    .use('/', './views/index.ejs')
 
     // listen to Heroku or local port...
     .listen(port, function() {

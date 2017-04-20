@@ -1,6 +1,6 @@
 {
-  "name": "Online Publication Management System",
-  "description": "CMPE138 Individual Project",
+  "name": "OPMS",
+  "description": "CMPE138 Individual Project - Online Publication Management System",
   "main": "server.js",
   "scripts": {
     "start": "node server.js"
