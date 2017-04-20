@@ -13,7 +13,9 @@ app
     .set('view engine', 'ejs')
 
     // set routes...
-    .use('/', './views/index.ejs')
+    .use('/', (req, res) => {
+        res.send('nothing')
+    })
 
     // listen to Heroku or local port...
     .listen(port, function() {
