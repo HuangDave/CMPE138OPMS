@@ -105,7 +105,7 @@ router
     //
     // @params {Number} pub_id - ID of the publication.
     //
-    .get('/:pub_id', (req, res, done) => {
+    .get('/id/:pub_id', (req, res, done) => {
         console.log('/publications/{pub_id} - querying publication for id: ' + req.params.pub_id)
         Query.Publications.queryById(req.params.pub_id)
         .then( publication => {
