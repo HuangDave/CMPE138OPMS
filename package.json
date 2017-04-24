@@ -3,10 +3,13 @@
   "description": "CMPE138 Individual Project - Online Publication Management System",
   "main": "server.js",
   "scripts": {
-    "start": "node server.js"
+    "start": "node server.js",
+    "test": "node ./node_modules/mocha/bin/mocha"
   },
   "dependencies": {
+    "body-parser": "^1.15.2",
     "express": "^4.14.0",
+    "js2xmlparser": "^3.0.0",
     "promise": "^7.1.1",
     "sqlite3": "^3.1.8"
   },
@@ -16,5 +19,10 @@
   "repository": {
     "type": "git",
     "url": "https://github.com/HuangDave/CMPE138OPMS.git"
+  },
+  "devDependencies": {
+    "supertest": "^2.0.1",
+    "chai": "^3.5.0",
+    "mocha": "^3.1.2"
   }
 }
