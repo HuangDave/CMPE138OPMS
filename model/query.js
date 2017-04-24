@@ -1,7 +1,5 @@
 
 const db = require('../config/database.js')
-//const Author = require('./author.js')
-//const Publications = require('./publicaations.js')
 
 var Query = {
 
