@@ -13,7 +13,7 @@ router
     //
     // @endpoint {POST} '/publications/'
     //
-    // @body {Number} pub_id  - ID of the publication.
+    // @body {Number} id      - ID of the publication.
     // @body {String} title   - Title of the publication.
     // @body {Number} year    - Year the article was published.
     // @body {String} journal - Journal the article was published in.
@@ -21,22 +21,28 @@ router
     // @body {Array}  authors - Array consisting of the authors of the publication.
     //
     // @return
-    .post('/add', (req, res, done) => {
-        console.log('/publications/add/{pub_id} - adding publication')
+    .post('/add', (req, res, next) => {
+        var authors = []
+        var i = 0
+        // parse and reconstruct the authors array in body since it's broken into keys of author[i]
+        while (req.body['authors['+i.toString()+']'] != undefined) {
+            authors.push(req.body['authors['+i.toString()+']'])
+            i++
+        }
         Publications.add({
-                 id: req.body.pub_id,
-              title: req.body.title,
-               year: req.body.year,
-            journal: req.body.journal,
-              pages: req.body.pages,
-            authors: req.body.authors
-        })
-        .then( publication => {
-            res.status(201).json(publication)
-        })
-        .catch( error => {
-            res.status(500).send(error)
-        })
+                     id: req.body.id,
+                  title: req.body.title,
+                   year: req.body.year,
+                journal: req.body.journal,
+                  pages: req.body.pages,
+                authors: authors
+            })
+            .then( publication => {
+                res.status(201).json(publication)
+            })
+            .catch( error => {
+                res.status(500).send(error)
+            })
     })
 
     // Updates the title or year of a publication
@@ -48,30 +54,28 @@ router
     // @body   {Number} year   - New year.
     //
     // @return
-    .put('/:pub_id', (req, res, done) => {
-        console.log('/publications/{pub_id} - updating publication for id: ' + req.params.pub_id)
+    .put('/update/:pub_id', (req, res, next) => {
         Publications.update(req.params.pub_id, {
-            title: req.body.title,
-             year: req.body.year
-        })
-        .then( result => {
-            res.status(202).json(result)
-        })
-        .catch( error => {
-            res.status(500).send(error)
-        })
+                title: req.body.title,
+                 year: req.body.year
+            })
+            .then( result => {
+                res.status(200).json(result)
+            })
+            .catch( error => {
+                res.status(500).send(error)
+            })
     })
 
 
-    .delete('/:pub_id', (req, res, done) => {
-        console.log('/publications/{pub_id} - deleting publication for id: ' + req.params.pub_id)
+    .delete('/remove/id/:pub_id', (req, res, next) => {
         Publications.removeById(req.params.pub_id)
-        .then( result => {
-            res.status(202).json(result)
-        })
-        .catch( error => {
-            res.status(500).send(error)
-        })
+            .then( result => {
+                res.status(202).json(result)
+            })
+            .catch( error => {
+                res.status(500).send(error)
+            })
     })
 
     // Removes publications by title, author, year, and/or journal.
@@ -83,20 +87,19 @@ router
     // @body {String} author  - Author of the publication.
     // @body {Number} year    - Year of the publication.
     // @body {String} journal - Title of the journal the article was published in.
-    .delete('/', (req, res, done) => {
-        console.log('/publications/ - deleting publication ')
+    .delete('/remove/', (req, res, next) => {
         Publications.removeBy({
-              title: req.body.title,
-             author: req.body.author,
-               year: req.body.year,
-            journal: req.body.journal
-        })
-        .then( result => {
-            res.status(202).json(result)
-        })
-        .catch( error => {
-            res.status(500).send(error)
-        })
+                  title: req.body.title,
+                 author: req.body.author,
+                   year: req.body.year,
+                journal: req.body.journal
+            })
+            .then( result => {
+                res.status(200).json(result)
+            })
+            .catch( error => {
+                res.status(500).send(error)
+            })
     })
 
     // Query a publication by its ID
@@ -105,16 +108,15 @@ router
     //
     // @params {Number} pub_id - ID of the publication.
     //
-    .get('/id/:pub_id', (req, res, done) => {
-        console.log('/publications/{pub_id} - querying publication for id: ' + req.params.pub_id)
+    .get('/id/:pub_id', (req, res, next) => {
         Query.Publications.queryById(req.params.pub_id)
-        .then( publication => {
-            res.status(200).json(publication)
-        })
-        .catch( error => {
-            console.error(error);
-            res.status(500).send(error)
-        })
+            .then( publication => {
+                res.status(200).json(publication)
+            })
+            .catch( error => {
+                console.error(error);
+                res.status(500).send(error)
+            })
     })
 
     // Query publications by title, year, journal, and/or author
@@ -136,24 +138,28 @@ router
     // @param {Bool}   descending   - Specifies if the sorting order should be ascending or descending.
     //                                  By default, results are sorted in ascending order.
     //
-    .get('/search?:title?:year?:year_op?:journal?:author?:sort_by?:descending?', (req, res, done) => {
-        console.log('/publications/search - querying publication ')
-        Query.Publications.queryBy({
+    .get('/search?:title?:year?:year_op?:journal?:author?:sort_by?:descending?', (req, res, next) => {
+        var query = {
               title: req.query.title,
                year: req.query.year,
-            year_op: req.query.year_op,
             journal: req.query.journal,
              author: req.query.author,
             sort_by: req.query.sort_by,
          descending: req.query.descending,
               limit: req.query.limit
-        })
-        .then( results => {
-            res.status(200).json(results)
-        })
-        .catch( error => {
-            res.status(500).send(error)
-        })
+        }
+        if (req.query.year_op != undefined || req.query.year_op != null) {
+            query.year_op = (typeof req.query.year_op === 'string' ? parseInt(req.query.year_op) : req.query.year_op)
+        } else {
+            query.year_op = 0
+        }
+        Query.Publications.queryBy(query)
+            .then( results => {
+                res.status(200).json(results)
+            })
+            .catch( error => {
+                res.status(500).send(error)
+            })
     })
 
 module.exports = router

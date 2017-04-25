@@ -16,6 +16,7 @@ module.exports = {
     //
     // @return {Promise} Returns the result in JSON.
     add: params => {
+        //console.log('attempting to insert publication: ' + JSON.stringify(params))
         return new Promise(function(resolve, reject) { // insert new publication to Publications table
             db.run('INSERT INTO Publication(pub_id, title, year, journal, pages) VALUES(?,?,?,?,?)',
                 [params.id, params.title, params.year, params.journal, params.pages],
@@ -56,25 +57,24 @@ module.exports = {
             params.push(title)
         }
         if (year != undefined || year != null) {
-            set_stmt += 'year=?'
+            set_stmt += (params.length > 0) ? ', year=? ' : 'year=? '
             params.push(year)
         }
         return new Promise( (resolve, reject) => {
             const stmt = 'UPDATE Publication '+set_stmt+where_stmt
-            //console.log('Publications.update - performing update: ' + stmt)
             db.run(stmt, params, error => {
-                if (error) {
-                    reject(error)
-                } else {
-                    //console.log('successfully updated: ' + id);
-                    resolve({
-                        updated: true,
-                        publication: {
-                            pub_id: id
-                        }
-                    })
-                }
+                if (error) reject(error)
+                else       resolve(true)
             })
+        })
+        .then( success => {
+            return Query.Publications.queryById(id)
+                .then( query => {
+                    return {
+                        updated: success,
+                        publication: query.publication
+                    }
+                })
         })
     },
 
@@ -101,8 +101,7 @@ module.exports = {
         const author =  req.author
         const year = req.year
         const journal = req.journal
-
-        var deletion = 'DELETE FROM Publication WHERE '
+        var deletion = 'FROM Publication WHERE '
         var params = []
 
         if (author != undefined || author != null) {
@@ -125,12 +124,29 @@ module.exports = {
         }
 
         return new Promise( (resolve, reject) => {
-            db.run(deletion, params, (error, rows) => {
+            // get the number of deletions...
+            db.all('SELECT COUNT(*) AS num_remove ' + deletion, params, (error, rows) => {
                 if (error) reject(error)
-                else       resolve({
-                    removed: true
-                })
+                else       resolve(rows[0].num_remove)
             })
+        })
+        .then( num_remove => {
+            if (num_remove == 0) {
+                return Promise.resolve({
+                    removed: false,
+                    total_deletions: num_remove
+                })
+            } else {
+                return new Promise( (resolve, reject) => {
+                    db.all('DELETE '+deletion, params, error => {
+                        if (error) reject(error)
+                        else       resolve({
+                                        removed: true,
+                                        total_deletions: num_remove
+                                    })
+                    })
+                })
+            }
         })
     }
 }

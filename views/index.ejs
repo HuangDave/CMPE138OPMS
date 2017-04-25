@@ -1,4 +1,54 @@
-<!-- views/index.ejs -->
-<% var title = 'N' %>
+<form class="form-horizontal">
+<fieldset>
 
-<h1>Home</h1>
+<!-- Form Name -->
+<legend>Search</legend>
+
+<!-- Text input-->
+<div class="form-group">
+  <label class="col-md-4 control-label" for="Search">Title</label>
+  <div class="col-md-4">
+  <input id="title" name="title" type="text" placeholder="title" class="form-control input-md">
+  </div>
+</div>
+
+<div class="form-group">
+  <label class="col-md-4 control-label" for="Search">Author</label>
+  <div class="col-md-4">
+  <input id="author" name="author" type="text" placeholder="name" class="form-control input-md">
+  </div>
+</div>
+
+<div class="form-group">
+  <label class="col-md-4 control-label" for="Search">Journal</label>
+  <div class="col-md-4">
+  <input id="journal" name="journal" type="text" placeholder="name" class="form-control input-md">
+  </div>
+</div>
+
+<div class="form-group">
+  <label class="col-md-4 control-label" for="Search">Year</label>
+  <div class="col-md-4">
+  <input id="year" name="year" type="text" placeholder="year" class="form-control input-md">
+  </div>
+  <div class="col-md-4">
+    <select id="year_op" name="year_op" class="form-control">
+      <option value="0">=</option>
+      <option value="1"><</option>
+      <option value="2">></option>
+      <option value="3"><=</option>
+      <option value="4">>=</option>
+    </select>
+  </div>
+</div>
+
+<!-- Button -->
+<div class="form-group">
+  <label class="col-md-4 control-label" for="submit"></label>
+  <div class="col-md-4">
+    <button>Search</button>
+  </div>
+</div>
+
+</fieldset>
+</form>

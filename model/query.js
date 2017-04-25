@@ -46,6 +46,7 @@ var Query = {
                         publication: []
                     }
                 }
+                // query all authors of the publication and add them to the output...
                 return Query.Author.list_authors(pub.pub_id)
                     .then( authors => {
                         pub.authors = []
@@ -81,7 +82,7 @@ var Query = {
         queryBy: req => {
             const author = req.author
             const year = req.year
-            const year_op = req.year_op
+            const year_op = (req.year_op == undefined ? 0 : req.year_op)
             const title = req.title
             const journal = req.journal
 
@@ -94,16 +95,16 @@ var Query = {
                         'FROM Publication p ' +
                         'WHERE '
             var params = []
-            if (author != undefined || author != null) {
+            if (author != undefined || author != null) {        // If the author parameter is supplied, adjust the query statement to also include the Author table.
                 query = 'SELECT DISTINCT p.pub_id, title, journal, pages, year ' +
                         'FROM Publication p, Author a ' +
                         'WHERE a.pub_id = p.pub_id ' +
                             'AND a.name LIKE ? '
                 params.push('%'+author+'%')
             }
-            if (year != undefined || year != null) {
-                var op
-                switch (year_op) {
+            if (year != undefined || year != null) {            // If year parameter is supplied, include it in the query
+                var op                                          // Check if a operator for comparing years is also included
+                switch (year_op) {                              // If none is included, the default operator is =, or 0
                     case 1: op = '<? ';  break;
                     case 2: op = '>? ';  break;
                     case 3: op = '<=? '; break;
@@ -115,37 +116,31 @@ var Query = {
                 query += 'year'+op
                 params.push(year)
             }
-            if (title != undefined || title != null) {
+            if (title != undefined || title != null) {          // If title parameter is supplied, include it in the query
                 if (params.length > 0) { query += 'AND ' }
                 query += 'title LIKE ? '
                 params.push('%'+title+'%')
             }
-            if (journal != undefined || journal != null) {
+            if (journal != undefined || journal != null) {      // If journal parameter is supplied, include it in the query
                 if (params.length > 0) { query += 'AND ' }
                 query += 'journal LIKE ? '
                 params.push('%'+journal+'%')
             }
-            if (sort_by != undefined || sort_by != null) {
+            if (sort_by != undefined || sort_by != null) {      // If sorting options are supplied, include it in the query
                 query += 'ORDER BY ' + sort_by + (descending ? ' DESC ' : ' ASC ')
             }
-            if (limit != undefined || limit != null) {
+            if (limit != undefined || limit != null) {          // If a limit is supplied, include it in the query
                 query += 'LIMIT ? '
                 params.push(limit)
             }
 
             return new Promise( (resolve, reject) => {          // query the list of publications
-                db.all(query, params, (err, rows) => {
-                    if (err) reject(error)
-                    else     resolve(rows)
-                })
-            }).
-            then( publications => {
-                if (publications.length == 0) {
-                    return Promise.resolve({
-                        total_found: 0,
-                        publications: []
+                    db.all(query, params, (err, rows) => {
+                        if (err) reject(error)
+                        else     resolve(rows)
                     })
-                } else {
+                }).
+                then( publications => {
                     return Promise.all(publications.map( pub => {   // for each publication query its authors
                         return Query.Author.list_authors(pub.pub_id)
                             .then( authors => {
@@ -156,13 +151,15 @@ var Query = {
                             })
                     }))
                     .then(function() {
-                        return {
-                            total_found: publications.length,
-                            publications: publications
-                        }
+                        return publications
                     })
-                }
-            })
+                })
+                .then( publications => {
+                    return {
+                        total_found: publications.length,
+                        publications: publications
+                    }
+                })
         }
     }
 }
