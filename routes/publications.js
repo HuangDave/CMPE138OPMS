@@ -6,12 +6,23 @@ const express = require('express'),
 
 // The router consists of endpoints for the following
 //
+// {POST}   /publications/add
+//
+// {PUT}    /publications/update/{pub_id}
+//
+// {DELETE} /publications/remove/id/{pub_id}
+// {DELETE} /publications/remove
+//
+// {GET}    /publications/search?title?={title}&year?={year}&year_op?={year_op}
+//                      &journal?={journal}&author?={author}&sort_by?={sort_by}&descending?={descending}
+
+// TODO: Add option to return responses in XML
 
 router
 
     // Add a publication
     //
-    // @endpoint {POST} '/publications/'
+    // @endpoint {POST} /publications/add
     //
     // @body {Number} id      - ID of the publication.
     // @body {String} title   - Title of the publication.
@@ -47,7 +58,7 @@ router
 
     // Updates the title or year of a publication
     //
-    // @endpoint {PUT} '/publications/{pub_id}'
+    // @endpoint {PUT} /publications/update/{pub_id}
     //
     // @params {Number} pub_id - ID of the publication.
     // @body   {String} title  - New title.
@@ -67,7 +78,15 @@ router
             })
     })
 
-
+    // Updates the title or year of a publication
+    //
+    // @endpoint {DELETE} /publications/remove/id/{pub_id}
+    //
+    // @params {Number} pub_id - ID of the publication.
+    // @body   {String} title  - New title.
+    // @body   {Number} year   - New year.
+    //
+    // @return
     .delete('/remove/id/:pub_id', (req, res, next) => {
         Publications.removeById(req.params.pub_id)
             .then( result => {
@@ -81,7 +100,7 @@ router
     // Removes publications by title, author, year, and/or journal.
     // Each given parameter must be exacted for the desired publication(s) to be removed.
     //
-    // @endpoint /publications/
+    // @endpoint {DELETE} /publications/remove
     //
     // @body {String} title   - Title of the publication.
     // @body {String} author  - Author of the publication.
@@ -104,7 +123,7 @@ router
 
     // Query a publication by its ID
     //
-    // @endpoint /publications/{pub_id}
+    // @endpoint {GET} /publications/remove
     //
     // @params {Number} pub_id - ID of the publication.
     //

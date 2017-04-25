@@ -125,6 +125,7 @@ describe('Routes: Publications', function() {
     describe('Update', function() {
 
         it('9 - should be able to change the name of an author or journal', done => {
+            // TODO: add route to update author name or journal title
             done()
             /*
             Authors.update(pub_id, "John Appleseed", 'Adam Appleseed')

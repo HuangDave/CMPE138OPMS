@@ -8,6 +8,8 @@ var Query = {
         // Query all authors of a given publication.
         //
         // @param {Number} id - ID of the publications
+        //
+        // @return {Array} Array consisting of all the authors of the publication.
         list_authors: id => {
             return new Promise( (resolve, reject) => {
                 db.all('SELECT DISTINCT name ' +
@@ -15,6 +17,12 @@ var Query = {
                        'WHERE pub_id=?', [id], (err, rows) => {
                     if (err) reject(err)
                     else     resolve(rows)
+                })
+            })
+            .then( rows => {
+                var authors = []
+                rows.forEach( auth => {
+                    authors.push(auth.name)
                 })
             })
         }
@@ -25,7 +33,10 @@ var Query = {
         // Query a publication by its id.
         //
         // @param {Number} publication_id
-        // @return {Promise} Returns the result in JSON.
+        //
+        // @return {Dictionary}
+        //      {Number}     total_found - Total number of publications queried.
+        //      {Dictionary} publication
         queryById: publication_id => {
             return new Promise( (resolve, reject) => {
                 db.all('SELECT DISTINCT * ' +
@@ -43,16 +54,13 @@ var Query = {
                 if (pub == null) {
                     return {
                         total_found: 0,
-                        publication: []
+                        publication: null
                     }
                 }
                 // query all authors of the publication and add them to the output...
                 return Query.Author.list_authors(pub.pub_id)
                     .then( authors => {
-                        pub.authors = []
-                        authors.forEach( author => {
-                            pub.authors.push(author.name)
-                        })
+                        pub.authors = authors
                         return {
                             total_found: 1,
                             publication: pub
@@ -72,7 +80,6 @@ var Query = {
         //                                  the = operator is used by default.
         // @param {String} title        - title of the publication
         // @param {String} journal      - title of the journal
-        //
         // @param {String} sort_by      - Specifies if the result should be sorted by year, journal, author, or title.
         //                                  By default, results will be sorted by pub_id
         // @param {Bool}   descending   - Specifies if the sorting order should be ascending or descending.
@@ -144,10 +151,7 @@ var Query = {
                     return Promise.all(publications.map( pub => {   // for each publication query its authors
                         return Query.Author.list_authors(pub.pub_id)
                             .then( authors => {
-                                pub.authors = []
-                                authors.forEach( author => {
-                                    pub.authors.push(author.name)
-                                })
+                                pub.authors = authors
                             })
                     }))
                     .then(function() {

@@ -14,7 +14,9 @@ module.exports = {
     // @param {String} journal      - Title of the journal
     // @param {String} pages        - Number of pages
     //
-    // @return {Promise} Returns the result in JSON.
+    // @return {Dictionary} Returns a dictionary containing the added publication.
+    //      {boolean} updated        - True if the publication was inserted to the database.
+    //      {Dictionary} publication - The added publication.
     add: params => {
         //console.log('attempting to insert publication: ' + JSON.stringify(params))
         return new Promise(function(resolve, reject) { // insert new publication to Publications table
@@ -46,6 +48,10 @@ module.exports = {
     //
     // @param {Number}     id       - ID of the publication
     // @param {Dictionary} updates  - dictionary containing updates with keys: title, year
+    //
+    // @return {Dictionary} On success returns a dictionary containing the updated publication.
+    //      {boolean} updated        - True if the publication was updated.
+    //      {Dictionary} publication - Update publication
     update: (id, updates) => {
         const title = updates.title
         const year = updates.year
@@ -80,7 +86,11 @@ module.exports = {
 
     // Remove a publication by its id.
     //
-    // @param {Number} publication_id
+    // @param {Number} publication_id - ID of the publication to remove.
+    //
+    // @return {Dictionary} Returns a dictionary describing the deletion.
+    //      {boolean} removed         - True if the publication with the provided id is removed.
+    //      {Number}  id              - ID of the publication to remove.
     removeById: publication_id => {
         return new Promise( (resolve, reject) => {
             db.run('DELETE ' +
@@ -95,7 +105,16 @@ module.exports = {
         })
     },
 
-    // Remove publications of a title, author, year, and/or journal
+    // Remove publications with a particular title, author, year, and/or journal
+    //
+    // @param {String} title    - Title of publication
+    // @param {String} author   - An author of the publication
+    // @param {Number} year     - Year published
+    // @param {String} journal  - Journal the publication is in
+    //
+    // @return {Dictionary} Returns a dictionary describing the deletion.
+    //      {boolean} removed         - True if publications that satifies the parameters are found and removed.
+    //      {Number}  total_deletions - Total number of publications removed.
     removeBy: req => {
         const title = req.title
         const author =  req.author
