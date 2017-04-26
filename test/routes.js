@@ -263,7 +263,7 @@ describe('Routes: Publications', function() {
                 .delete('/publications/remove/id/'+pub_id)
                 .set('Accept', 'application/json')
                 .set('Content-Type', 'application/x-www-form-urlencoded')
-                .expect(202, (error, res) => {
+                .expect(200, (error, res) => {
                     if (error) throw new Error(error)
                     assert(res.body.removed)
                     done()

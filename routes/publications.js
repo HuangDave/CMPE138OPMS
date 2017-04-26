@@ -1,6 +1,7 @@
 
 const express = require('express'),
        router = express.Router(),
+ js2xmlparser = require("js2xmlparser"),
         Query = require('../model/query.js'),
  Publications = require('../model/publications.js')
 
@@ -17,6 +18,13 @@ const express = require('express'),
 //                      &journal?={journal}&author?={author}&sort_by?={sort_by}&descending?={descending}
 
 // TODO: Add option to return responses in XML
+
+check_content_type = (req, content) => {
+    if (req.headers['content-type'] == 'text/xml') {
+        return js2xmlparser.parse('result', content)
+    }
+    return content
+}
 
 router
 
@@ -50,7 +58,7 @@ router
                 authors: authors
             })
             .then( publication => {
-                res.status(201).json(publication)
+                res.status(201).send(check_content_type(req, publication))
             })
             .catch( error => {
                 res.status(500).send(error)
@@ -91,7 +99,7 @@ router
               journal: req.body.journal
             })
             .then( result => {
-                res.status(200).json(result)
+                res.status(200).send(check_content_type(req, result))
             })
             .catch( error => {
                 res.status(500).send(error)
@@ -110,7 +118,7 @@ router
     .delete('/remove/id/:pub_id', (req, res, next) => {
         Publications.removeById(req.params.pub_id)
             .then( result => {
-                res.status(202).json(result)
+                res.status(200).send(check_content_type(req, result))
             })
             .catch( error => {
                 res.status(500).send(error)
@@ -134,7 +142,8 @@ router
                 journal: req.body.journal
             })
             .then( result => {
-                res.status(200).json(result)
+                // TODO: return result as XML or JSON
+                res.status(200).send(check_content_type(req, result))
             })
             .catch( error => {
                 res.status(500).send(error)
@@ -150,10 +159,9 @@ router
     .get('/id/:pub_id', (req, res, next) => {
         Query.Publications.queryById(req.params.pub_id)
             .then( publication => {
-                res.status(200).json(publication)
+                res.status(200).send(check_content_type(req, publication))
             })
             .catch( error => {
-                console.error(error);
                 res.status(500).send(error)
             })
     })
@@ -176,7 +184,7 @@ router
     // @param {Bool}   descending   - Specifies if the sorting order should be ascending or descending.
     //                                  By default, results are sorted in ascending order.
     //
-    .get('/search?:title?:year?:year_op?:journal?:author?:sort_by?:descending?', (req, res, next) => {
+    .get('/search?:title?:year?:year_op?:journal?:author?:sort_by?:descending?:subset_start?:subset_end?', (req, res, next) => {
         var query = {
               title: req.query.title,
                year: req.query.year,
@@ -189,7 +197,18 @@ router
         }
         Query.Publications.queryBy(query)
             .then( results => {
-                res.status(200).json(results)
+                if (req.query.subset_start == undefined || req.query.subset_end == undefined) {
+                    res.status(200).send(check_content_type(req, results))
+                } else {
+                    var start = req.query.subset_start < 1 ? 0 : req.query.subset_start
+                    var end = (req.query.subset_end > results.length) ? results.length : req.query.subset_end
+                    var subset = results.publications.slice(start-1, end)
+                    res.status(200).send(check_content_type(req, {
+                        total_found: subset.length,
+                        subset: start+'-'+end,
+                        publications: subset
+                    }))
+                }
             })
             .catch( error => {
                 res.status(500).send(error)
