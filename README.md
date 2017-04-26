@@ -50,6 +50,24 @@ Query publications by by title, year, journal, and/or author name, result can be
 {GET} /publications/search?title?={title}&year?={year}&year_op?={year_op}&journal?={journal}&author?={author}&sort_by?={sort_by}
 ~~~
 
+Examples:
+--
+
+Query publications with 'recog' in the title, from the year 2000, published in the journal CVPR, written by Venu Govindaraju and get the result as XML:
+~~~
+curl -X GET \
+  'https://cmpe138opms.herokuapp.com/publications/search?title=recog&year=2000&year_op=1&journal=CVPR&author=Venu%20Govindaraju' \
+  -H 'content-type: text/xml' \
+  ~~~
+
+Remove publications by John Appleseed:
+~~~
+curl -X DELETE \
+  https://cmpe138opms.herokuapp.com/publications/remove/ \
+  -H 'content-type: application/x-www-form-urlencoded' \
+  -d author=John%20Appleseed
+  ~~~
+
 Test:
 --
 ~~~
