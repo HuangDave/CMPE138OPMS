@@ -31,7 +31,8 @@ router
     // @body {String} pages   - number of pages
     // @body {Array}  authors - Array consisting of the authors of the publication.
     //
-    // @return
+    // @return On success, returns a JSON or XML object consisting of the added publication.
+    //
     .post('/add', (req, res, next) => {
         var authors = []
         var i = 0
@@ -58,17 +59,36 @@ router
 
     // Updates the title or year of a publication
     //
+    // When updating an author, if no old author name is provided,
+    // the new author name will be added to existing authors of the publication.
+    //
     // @endpoint {PUT} /publications/update/{pub_id}
     //
-    // @params {Number} pub_id - ID of the publication.
-    // @body   {String} title  - New title.
-    // @body   {Number} year   - New year.
+    // @params {Number}     pub_id     - ID of the publication.
+    // @body   {String}     title      - New title.
+    // @body   {Number}     year       - New year.
+    // @body   {Dictionary} authors    - Array consisting of the old author name and new author name.
+    //             {String} old_author - Name of the current author to change
+    //             {String} new_author - Name to change to.
+    // @body   {String} journal - New journal name.
     //
     // @return
     .put('/update/:pub_id', (req, res, next) => {
+        var authors = []
+        var i = 0
+        // parse and reconstruct the authors array in body since it's broken into keys of author[i]
+        while (req.body['authors['+i.toString()+']'] != undefined) {
+            authors.push(req.body['authors['+i.toString()+']'])
+            i++
+        }
         Publications.update(req.params.pub_id, {
                 title: req.body.title,
-                 year: req.body.year
+                 year: req.body.year,
+               author: {
+                   old_author: req.body['author[old_author]'],
+                   new_author: req.body['author[new_author]']
+               },
+              journal: req.body.journal
             })
             .then( result => {
                 res.status(200).json(result)
@@ -151,7 +171,6 @@ router
     //                                  the = operator is used by default.
     // @param {String} title        - title of the publication
     // @param {String} journal      - title of the journal
-    //
     // @param {String} sort_by      - Specifies if the result should be sorted by year, journal, author, or title.
     //                                  By default, results will be sorted by pub_id
     // @param {Bool}   descending   - Specifies if the sorting order should be ascending or descending.
@@ -164,13 +183,9 @@ router
             journal: req.query.journal,
              author: req.query.author,
             sort_by: req.query.sort_by,
+            year_op: req.query.year_op,
          descending: req.query.descending,
               limit: req.query.limit
-        }
-        if (req.query.year_op != undefined || req.query.year_op != null) {
-            query.year_op = (typeof req.query.year_op === 'string' ? parseInt(req.query.year_op) : req.query.year_op)
-        } else {
-            query.year_op = 0
         }
         Query.Publications.queryBy(query)
             .then( results => {

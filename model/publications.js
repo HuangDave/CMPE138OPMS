@@ -55,6 +55,7 @@ module.exports = {
     update: (id, updates) => {
         const title = updates.title
         const year = updates.year
+        const journal = updates.journal
         var set_stmt = 'SET '
         var where_stmt = ' WHERE pub_id='+id
         var params = []
@@ -66,12 +67,38 @@ module.exports = {
             set_stmt += (params.length > 0) ? ', year=? ' : 'year=? '
             params.push(year)
         }
+        if (journal != undefined || journal != null) {
+            set_stmt += (params.length > 0) ? ', journal=? ' : 'journal=? '
+            params.push(journal)
+        }
         return new Promise( (resolve, reject) => {
-            const stmt = 'UPDATE Publication '+set_stmt+where_stmt
-            db.run(stmt, params, error => {
-                if (error) reject(error)
-                else       resolve(true)
-            })
+            if (title == undefined && year == undefined && journal == undefined) {
+                resolve(true)
+            } else {
+                const stmt = 'UPDATE Publication '+set_stmt+where_stmt
+                db.run(stmt, params, error => {
+                    if (error) reject(error)
+                    else       resolve(true)
+                })
+            }
+        })
+        .then( success => {
+            const author = updates.author
+            if (author.new_author != undefined) {
+                if (author.old_author == undefined || author.old_author == null) {
+                    return Author.add(id, author.new_author)
+                        .then( function() {
+                            return success
+                        })
+                } else {
+                    return Author.update(id, author.old_author, author.new_author)
+                        .then( function() {
+                            return success
+                        })
+                }
+            } else {
+                return success
+            }
         })
         .then( success => {
             return Query.Publications.queryById(id)

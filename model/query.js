@@ -24,6 +24,7 @@ var Query = {
                 rows.forEach( auth => {
                     authors.push(auth.name)
                 })
+                return authors
             })
         }
     },
@@ -89,13 +90,11 @@ var Query = {
         queryBy: req => {
             const author = req.author
             const year = req.year
-            const year_op = (req.year_op == undefined ? 0 : req.year_op)
+            const year_op = req.year_op
             const title = req.title
             const journal = req.journal
-
             const sort_by = req.sort_by
             const descending = req.descending ? req.descending : false
-
             const limit = req.limit
 
             var query = 'SELECT DISTINCT * ' +
@@ -110,8 +109,14 @@ var Query = {
                 params.push('%'+author+'%')
             }
             if (year != undefined || year != null) {            // If year parameter is supplied, include it in the query
+                var year_op_int                                 // convert input to an int if its a string ex. '0' to 0
+                if (year_op != undefined || year_op != null) {
+                    year_op_int = (typeof year_op === 'string' ? parseInt(year_op) : year_op)
+                } else {
+                    year_op_int = 0
+                }
                 var op                                          // Check if a operator for comparing years is also included
-                switch (year_op) {                              // If none is included, the default operator is =, or 0
+                switch (year_op_int) {                          // If none is included, the default operator is =, or 0
                     case 1: op = '<? ';  break;
                     case 2: op = '>? ';  break;
                     case 3: op = '<=? '; break;
