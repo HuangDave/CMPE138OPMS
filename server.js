@@ -15,7 +15,10 @@ app
 
     .use(bodyParser.urlencoded({extended: false })) // set configurations...
     .use(bodyParser.json())
-    
+
+    .get('/', (req, res, next) => {
+        res.send('CMPE138 Online Publication Management System')
+    })
     .use('/publications', pub_routes)
 
     .listen(port, function() {  // listen to Heroku or local port...

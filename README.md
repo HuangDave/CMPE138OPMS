@@ -8,21 +8,46 @@ Engineering and allows users to add, update, remove, or query publications from 
 
 Run:
 --
-Ensure npm is installed:
-~~~
-sudo gem install npm
-~~~
+Ensure [Node](https://nodejs.org/en/download/) and [npm](https://www.npmjs.com/) are installed.
 
-To run locally on port 8080:
+To run locally on port 8080, go to the directory:
 ~~~
-cd '/service'
 npm update
 npm start
 ~~~
 
+Alternatively, the web service can be accessed [here](https://cmpe138opms.herokuapp.com/).
+
 RESTful Endpoints:
 --
 
+Add a publication:
+~~~
+{POST} /publications/add
+~~~
+
+Update a publication’s title, year, journal, and/or author name:
+~~~
+{PUT} /publications/update/{pub_id}
+~~~
+
+Remove a publication by ID:
+~~~
+{DELETE} /publications/remove/id/{pub_id}
+~~~
+
+Remove a publication by title, year, author, and/or journal
+{DELETE} /publications/remove
+
+Query a publication by its ID:
+~~~
+{GET} /publication/id/{pub_id}
+~~~
+
+Query publications by by title, year, journal, and/or author name
+~~~
+{GET} /publications/search?title?={title}&year?={year}&year_op?={year_op}&journal?={journal}&author?={author}&sort_by?={sort_by}
+~~~
 Examples:
 --
 

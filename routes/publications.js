@@ -14,10 +14,10 @@ const express = require('express'),
 // {DELETE} /publications/remove/id/{pub_id}
 // {DELETE} /publications/remove
 //
+// {GET}    /publication/id/{pub_id}
 // {GET}    /publications/search?title?={title}&year?={year}&year_op?={year_op}
-//                      &journal?={journal}&author?={author}&sort_by?={sort_by}&descending?={descending}
-
-// TODO: Add option to return responses in XML
+//                      &journal?={journal}&author?={author}&sort_by?={sort_by}
+//                      &descending?={descending}&subset_start?={subset_start}&subset_end?={subset_end}
 
 check_content_type = (req, content) => {
     if (req.headers['content-type'] == 'text/xml') {
@@ -65,7 +65,7 @@ router
             })
     })
 
-    // Updates the title or year of a publication
+    // Updates the title, year, journal name, and/or author name of a publication
     //
     // When updating an author, if no old author name is provided,
     // the new author name will be added to existing authors of the publication.
@@ -142,7 +142,6 @@ router
                 journal: req.body.journal
             })
             .then( result => {
-                // TODO: return result as XML or JSON
                 res.status(200).send(check_content_type(req, result))
             })
             .catch( error => {
@@ -168,21 +167,25 @@ router
 
     // Query publications by title, year, journal, and/or author
     // The results can optionally be sorted by title, year, journal, or author in ascending or descending order.
+    // Additionally the user can requery to have a subset of the query by providing subset_start and subset_end.
     //
     // @endpoint {GET} /publications/search?title?={title}&year?={year}&year_op?={year_op}
-    //                      &journal?={journal}&author?={author}&sort_by?={sort_by}&descending?={descending}
+    //                      &journal?={journal}&author?={author}&sort_by?={sort_by}
+    //                      &descending?={descending}&subset_start?={subset_start}&subset_end?={subset_end}
     //
-    // @param {String} author       - name of the author
-    // @param {Number} year         - year
-    // @param {Number} year_op      - operator for comparing year: =, <, >, <=, >=
+    // @query {String} author       - name of the author
+    // @query {Number} year         - year
+    // @query {Number} year_op      - operator for comparing year: =, <, >, <=, >=
     //                                  each are represented by 0, 1, 2, 3, 4 respectively
     //                                  the = operator is used by default.
-    // @param {String} title        - title of the publication
-    // @param {String} journal      - title of the journal
-    // @param {String} sort_by      - Specifies if the result should be sorted by year, journal, author, or title.
+    // @query {String} title        - title of the publication
+    // @query {String} journal      - title of the journal
+    // @query {String} sort_by      - Specifies if the result should be sorted by year, journal, author, or title.
     //                                  By default, results will be sorted by pub_id
-    // @param {Bool}   descending   - Specifies if the sorting order should be ascending or descending.
+    // @query {Bool}   descending   - Specifies if the sorting order should be ascending or descending.
     //                                  By default, results are sorted in ascending order.
+    // @query {Number} subset_start - Start of subset
+    // @query {Number} subset_end   - End of subset
     //
     .get('/search?:title?:year?:year_op?:journal?:author?:sort_by?:descending?:subset_start?:subset_end?', (req, res, next) => {
         var query = {
