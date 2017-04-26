@@ -6,8 +6,8 @@ Engineering and allows users to add, update, remove, or query publications from 
 **Web Service**
 ---
 
-Run:
---
+**Installation**
+
 Ensure [Node](https://nodejs.org/en/download/) and [npm](https://www.npmjs.com/) are installed.
 
 To run locally on port 8080, go to the directory:
@@ -18,8 +18,7 @@ npm start
 
 Alternatively, the web service can be accessed [here](https://cmpe138opms.herokuapp.com/).
 
-RESTful Endpoints:
---
+**RESTful Endpoints**
 
 Add a publication:
 ~~~
@@ -50,10 +49,8 @@ Query publications by by title, year, journal, and/or author name, result can be
 ~~~
 {GET} /publications/search?title?={title}&year?={year}&year_op?={year_op}&journal?={journal}&author?={author}&sort_by?={sort_by}
 ~~~
-Examples:
---
 
-Tests:
+Test:
 --
 ~~~
 npm test
