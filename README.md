@@ -36,15 +36,17 @@ Remove a publication by ID:
 {DELETE} /publications/remove/id/{pub_id}
 ~~~
 
-Remove a publication by title, year, author, and/or journal
+Remove a publication by title, year, author, and/or journal:
+~~~
 {DELETE} /publications/remove
+~~~
 
 Query a publication by its ID:
 ~~~
 {GET} /publication/id/{pub_id}
 ~~~
 
-Query publications by by title, year, journal, and/or author name
+Query publications by by title, year, journal, and/or author name, result can be sorted by title, journal, year, or author name. Additionally a subset of the results can be requested:
 ~~~
 {GET} /publications/search?title?={title}&year?={year}&year_op?={year_op}&journal?={journal}&author?={author}&sort_by?={sort_by}
 ~~~
