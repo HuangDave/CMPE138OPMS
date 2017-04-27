@@ -8,15 +8,14 @@ Engineering and allows users to add, update, remove, or query publications from 
 
 **Installation**
 
+The web service can be accessed [here](https://cmpe138opms.herokuapp.com/).
 Ensure [Node](https://nodejs.org/en/download/) and [npm](https://www.npmjs.com/) are installed.
 
-To run locally on port 8080, go to the directory:
+Alternatively, the web service can be run locally on port 8080, go to the directory (ensure [Node](https://nodejs.org/en/download/) and [npm](https://www.npmjs.com/) are installed):
 ~~~
 npm update
 npm start
 ~~~
-
-Alternatively, the web service can be accessed [here](https://cmpe138opms.herokuapp.com/).
 
 **RESTful Endpoints**
 
